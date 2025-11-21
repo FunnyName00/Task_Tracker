@@ -30,14 +30,53 @@ public class taskList {
         Modify task in list at index and change updatedDateList[index] to current date
         */
 
-        list.set(index, task);
-        LocalDate date = LocalDate.now();
-        updatedDateList.set(index, date);
-        System.out.println("Task successfully updated (ID: " + index +")");
+        if (index >= list.size() || index < 0) System.out.println("Please use a valid Task index");
+
+        else {
+            list.set(index, task);
+            LocalDate date = LocalDate.now();
+            updatedDateList.set(index, date);
+            System.out.println("Task successfully updated (ID: " + index + ")");
+        }
     }
 
-    public String createStringTask(Integer index){
+    public void delete(Integer index){
+        /*
+        INPUT : Integer index
+        RETURN : /
+        Delete task in every lists at index
+        */
 
+        if (index >= list.size() || index < 0) System.out.println("Please use a valid Task index");
+
+        else {
+            list.remove(index);
+            doneList.remove(index);
+            createdDateList.remove(index);
+            updatedDateList.remove(index);
+
+            System.out.println("Task successfully deleted (ID: " + index +")");
+        }
+    }
+
+    public void list(){
+        /*
+        INPUT : /
+        RETURN : /
+        Print every tasks in the list with all informations
+        */
+        for (int i = 0; i < list.size(); i++){
+            System.out.println(createStringTask(i));
+        }
+    }
+
+
+    public String createStringTask(Integer index){
+        /*
+        INPUT : Integer index
+        RETURN : /
+        Create a string describing the task at index
+        */
         String done = "";
         switch (doneList.get(index)){
             case (0):
