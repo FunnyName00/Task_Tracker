@@ -59,6 +59,11 @@ public class taskList {
         }
     }
 
+    public void changeStatus(Integer index, Integer status){
+        doneList.set(index, status);
+        System.out.println("Task status successfully changed (ID: " + index +")");
+    }
+
     public void list(){
         /*
         INPUT : /

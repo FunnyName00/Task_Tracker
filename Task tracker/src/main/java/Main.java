@@ -15,6 +15,10 @@ public class Main {
         list.update(0, "Sortir le chat");
         System.out.println("----------------");
         list.list();
+        System.out.println("----------------");
+        list.changeStatus(0, 1);
+        System.out.println("----------------");
+        list.list();
 
     }
 
