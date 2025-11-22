@@ -20,7 +20,9 @@ public class taskList {
         LocalDate date = LocalDate.now();
         createdDateList.add(date);
         updatedDateList.add(date);
-        System.out.println("Task successfully added (ID: " + list.indexOf(task) +")");
+        Integer index = list.indexOf(task);
+        FileGestion.appendToFile(index+ " " + list.get(index) + " " + doneList.get(index) + " " + createdDateList.get(index)+ " " + updatedDateList.get(index));
+        System.out.println("Task successfully added (ID: " + index +")");
     }
 
     public void update(Integer index, String task){
@@ -60,8 +62,11 @@ public class taskList {
     }
 
     public void changeStatus(Integer index, Integer status){
-        doneList.set(index, status);
-        System.out.println("Task status successfully changed (ID: " + index +")");
+        if (status < 0 || status > 2) System.out.println("Enter valid status");
+        else {
+            doneList.set(index, status);
+            System.out.println("Task status successfully changed (ID: " + index + ")");
+        }
     }
 
     public void list(){
@@ -75,6 +80,16 @@ public class taskList {
         }
     }
 
+    public void list(Integer status){
+        /*
+        INPUT : Integer status
+        RETURN : /
+        Print every tasks with a certain status in the list with all informations
+        */
+        for (int i = 0; i < doneList.size(); i++){
+            if (doneList.get(i) == status) System.out.println(createStringTask(i));
+        }
+    }
 
     public String createStringTask(Integer index){
         /*
