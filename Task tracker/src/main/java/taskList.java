@@ -8,157 +8,123 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 
 public class taskList {
-    public String filename = "task.json";
-    ArrayList<Task> list = new ArrayList<>();
+
+    public String filename;
+    ArrayList<Task> list;
 
     public taskList(String filename) {
         this.filename = filename;
         this.list = new ArrayList<>();
-        loadFromJSON(filename); // charge automatiquement le fichier
+        loadFromJSON();     // charge automatiquement le fichier
     }
-    public void add(String task){
-        /*
-        INPUT : Str task
-        RETURN : /
-        Add task to list, add 0 to doneList and add date to createdDateList & updatedDateList
-        */
 
+    public taskList() {
+        this("task.json");
+    }
+
+    public void add(String task){
         Task newTask = new Task(task, 0, LocalDate.now(), LocalDate.now());
         list.add(newTask);
 
-        Integer index = list.size() - 1;
-        System.out.println("Task successfully added (ID: " + index +")");
-        saveToJSON(filename);
+        System.out.println("Task successfully added (ID: " + (list.size() - 1) +")");
+        saveToJSON();
     }
 
     public void update(Integer index, String task){
-        /*
-        INPUT : Integer index, String task
-        RETURN : /
-        Modify task in list at index and change updatedDateList[index] to current date
-        */
-
-        if (index >= list.size() || index < 0) System.out.println("Please use a valid Task index");
-
-        else {
-            Task newTask = new Task(task,
-                    list.get(index).status,
-                    list.get(index).created,
-                    LocalDate.now()
-            );
-            list.set(index, newTask);
-            System.out.println("Task successfully updated (ID: " + index + ")");
-            saveToJSON(filename);
+        if (index >= list.size() || index < 0) {
+            System.out.println("Please use a valid Task index");
+            return;
         }
+
+        Task old = list.get(index);
+        Task newTask = new Task(task, old.status, old.created, LocalDate.now());
+
+        list.set(index, newTask);
+        System.out.println("Task updated (ID: " + index + ")");
+        saveToJSON();
     }
 
     public void delete(Integer index){
-        /*
-        INPUT : Integer index
-        RETURN : /
-        Delete task in every lists at index
-        */
-
-        if (index >= list.size() || index < 0) System.out.println("Please use a valid Task index");
-
-        else {
-            list.remove(index);
-            System.out.println("Task successfully deleted (ID: " + index +")");
-            saveToJSON(filename);
+        if (index >= list.size() || index < 0) {
+            System.out.println("Please use a valid Task index");
+            return;
         }
+
+        System.out.println("DEBUG BEFORE DELETE: " + list.size());
+        list.remove(list.get(index));
+        System.out.println("DEBUG AFTER DELETE: " + list.size());
+
+        System.out.println("Task deleted (ID: " + index + ")");
+        saveToJSON();
     }
 
     public void changeStatus(Integer index, Integer status){
-        if (status < 0 || status > 2) System.out.println("Enter valid status");
-        else {
-            Task newTask = new Task(list.get(index).name, status, list.get(index).created, list.get(index).updated);
-            list.set(index, newTask);
-            System.out.println("Task status successfully changed (ID: " + index + ")");
-            saveToJSON(filename);
+        if (status < 0 || status > 2) {
+            System.out.println("Enter valid status");
+            return;
         }
+
+        Task old = list.get(index);
+        Task t = new Task(old.name, status, old.created, old.updated);
+
+        list.set(index, t);
+        System.out.println("Task status changed (ID: " + index + ")");
+        saveToJSON();
     }
 
     public void list(){
-        /*
-        INPUT : /
-        RETURN : /
-        Print every tasks in the list with all informations
-        */
         for (int i = 0; i < list.size(); i++){
             System.out.println(createStringTask(i));
         }
     }
 
-    public void list(Integer status){
-        /*
-        INPUT : Integer status
-        RETURN : /
-        Print every tasks with a certain status in the list with all informations
-        */
-        for (int i = 0; i < list.size(); i++){
-            if (list.get(i).status == status) System.out.println(createStringTask(i));
-        }
-    }
-
     public String createStringTask(Integer index){
-        /*
-        INPUT : Integer index
-        RETURN : /
-        Create a string describing the task at index
-        */
-        String done = "";
-        switch (list.get(index).status){
-            case (0):
-                done = "todo";
-                break;
-            case (1):
-                done = "in-progress";
-                break;
-            case (2):
-                done = "done";
-                break;
-        }
+        Task t = list.get(index);
 
-        String string = (index + "| " + list.get(index).name
+        String done = switch(t.status) {
+            case 0 -> "todo";
+            case 1 -> "in-progress";
+            case 2 -> "done";
+            default -> "unknown";
+        };
+
+        return index + "| " + t.name
                 + " | status : " + done
-                + " | created on : " + list.get(index).created
-                + " | updated on : " + list.get(index).updated
-        );
-
-        return string;
+                + " | created : " + t.created
+                + " | updated : " + t.updated;
     }
 
-
-    public void saveToJSON(String filename) {
+    public void saveToJSON() {
         JSONArray array = new JSONArray();
 
-        for (int i = 0; i < list.size(); i++) {
-            Task t = list.get(i);
-
+        for (Task t : list) {
             JSONObject obj = new JSONObject();
             obj.put("name", t.name);
             obj.put("status", t.status);
             obj.put("created", t.created.toString());
             obj.put("updated", t.updated.toString());
-
             array.put(obj);
         }
 
         try (FileWriter file = new FileWriter(filename)) {
-            file.write(array.toString(4));  // indentation 4 spaces
+            file.write(array.toString(4));
             System.out.println("Tasks saved to " + filename);
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    public void loadFromJSON(String filename) {
+    public void loadFromJSON() {
         try {
-            String content = new String(Files.readAllBytes(Paths.get(filename)));
+            if (!Files.exists(Paths.get(filename))) {
+                Files.write(Paths.get(filename), "[]".getBytes());
+                System.out.println("Created new task file: " + filename);
+            }
 
+            String content = new String(Files.readAllBytes(Paths.get(filename)));
             JSONArray array = new JSONArray(content);
 
-            list.clear(); // important !
+            list.clear();
 
             for (int i = 0; i < array.length(); i++) {
                 JSONObject obj = array.getJSONObject(i);
@@ -180,5 +146,41 @@ public class taskList {
         }
     }
 
+    public void handleCommand(String command){
 
+        String[] newCommand  = command.split(" ");
+
+        switch (newCommand[0]){
+
+            case "add": {
+                String task = new String();
+                for (int i = 1; i < newCommand.length; i++){
+                    task += newCommand[i] + " ";
+                }
+                add(task);
+                break;
+            }
+
+            case "update": {
+                String task = new String();
+                for (int i = 2; i < newCommand.length; i++){
+                    task += newCommand[i];
+                }
+                Integer index = Integer.parseInt(newCommand[1]);
+                update(index, task);
+                break;
+            }
+
+            case "delete": {
+                delete(Integer.parseInt(newCommand[1]));
+                break;
+            }
+
+            case "list":{
+                list();
+                break;
+            }
+
+        }
+    }
 }
