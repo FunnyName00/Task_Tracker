@@ -1,12 +1,21 @@
 import java.util.ArrayList;
 import java.time.LocalDate;
+import org.json.JSONArray;
+import org.json.JSONObject;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 
 public class taskList {
-    ArrayList<String> list = new ArrayList<>();
-    ArrayList<Integer> doneList = new ArrayList<>();
-    ArrayList<LocalDate> createdDateList = new ArrayList<>();
-    ArrayList<LocalDate> updatedDateList = new ArrayList<>();
+    public String filename = "task.json";
+    ArrayList<Task> list = new ArrayList<>();
 
+    public taskList(String filename) {
+        this.filename = filename;
+        this.list = new ArrayList<>();
+        loadFromJSON(filename); // charge automatiquement le fichier
+    }
     public void add(String task){
         /*
         INPUT : Str task
@@ -14,15 +23,12 @@ public class taskList {
         Add task to list, add 0 to doneList and add date to createdDateList & updatedDateList
         */
 
-        list.add(task);
-        doneList.add(0);
+        Task newTask = new Task(task, 0, LocalDate.now(), LocalDate.now());
+        list.add(newTask);
 
-        LocalDate date = LocalDate.now();
-        createdDateList.add(date);
-        updatedDateList.add(date);
-        Integer index = list.indexOf(task);
-        FileGestion.appendToFile(index+ " " + list.get(index) + " " + doneList.get(index) + " " + createdDateList.get(index)+ " " + updatedDateList.get(index));
+        Integer index = list.size() - 1;
         System.out.println("Task successfully added (ID: " + index +")");
+        saveToJSON(filename);
     }
 
     public void update(Integer index, String task){
@@ -35,10 +41,14 @@ public class taskList {
         if (index >= list.size() || index < 0) System.out.println("Please use a valid Task index");
 
         else {
-            list.set(index, task);
-            LocalDate date = LocalDate.now();
-            updatedDateList.set(index, date);
+            Task newTask = new Task(task,
+                    list.get(index).status,
+                    list.get(index).created,
+                    LocalDate.now()
+            );
+            list.set(index, newTask);
             System.out.println("Task successfully updated (ID: " + index + ")");
+            saveToJSON(filename);
         }
     }
 
@@ -53,19 +63,18 @@ public class taskList {
 
         else {
             list.remove(index);
-            doneList.remove(index);
-            createdDateList.remove(index);
-            updatedDateList.remove(index);
-
             System.out.println("Task successfully deleted (ID: " + index +")");
+            saveToJSON(filename);
         }
     }
 
     public void changeStatus(Integer index, Integer status){
         if (status < 0 || status > 2) System.out.println("Enter valid status");
         else {
-            doneList.set(index, status);
+            Task newTask = new Task(list.get(index).name, status, list.get(index).created, list.get(index).updated);
+            list.set(index, newTask);
             System.out.println("Task status successfully changed (ID: " + index + ")");
+            saveToJSON(filename);
         }
     }
 
@@ -86,8 +95,8 @@ public class taskList {
         RETURN : /
         Print every tasks with a certain status in the list with all informations
         */
-        for (int i = 0; i < doneList.size(); i++){
-            if (doneList.get(i) == status) System.out.println(createStringTask(i));
+        for (int i = 0; i < list.size(); i++){
+            if (list.get(i).status == status) System.out.println(createStringTask(i));
         }
     }
 
@@ -98,7 +107,7 @@ public class taskList {
         Create a string describing the task at index
         */
         String done = "";
-        switch (doneList.get(index)){
+        switch (list.get(index).status){
             case (0):
                 done = "todo";
                 break;
@@ -110,12 +119,65 @@ public class taskList {
                 break;
         }
 
-        String string = (index + "| " + list.get(index)
+        String string = (index + "| " + list.get(index).name
                 + " | status : " + done
-                + " | created on : " + createdDateList.get(index)
-                + " | updated on : " + updatedDateList.get(index));
+                + " | created on : " + list.get(index).created
+                + " | updated on : " + list.get(index).updated
+        );
 
         return string;
+    }
+
+
+    public void saveToJSON(String filename) {
+        JSONArray array = new JSONArray();
+
+        for (int i = 0; i < list.size(); i++) {
+            Task t = list.get(i);
+
+            JSONObject obj = new JSONObject();
+            obj.put("name", t.name);
+            obj.put("status", t.status);
+            obj.put("created", t.created.toString());
+            obj.put("updated", t.updated.toString());
+
+            array.put(obj);
+        }
+
+        try (FileWriter file = new FileWriter(filename)) {
+            file.write(array.toString(4));  // indentation 4 spaces
+            System.out.println("Tasks saved to " + filename);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void loadFromJSON(String filename) {
+        try {
+            String content = new String(Files.readAllBytes(Paths.get(filename)));
+
+            JSONArray array = new JSONArray(content);
+
+            list.clear(); // important !
+
+            for (int i = 0; i < array.length(); i++) {
+                JSONObject obj = array.getJSONObject(i);
+
+                Task t = new Task(
+                        obj.getString("name"),
+                        obj.getInt("status"),
+                        LocalDate.parse(obj.getString("created")),
+                        LocalDate.parse(obj.getString("updated"))
+                );
+
+                list.add(t);
+            }
+
+            System.out.println("Tasks loaded from " + filename);
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
 
