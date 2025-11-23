@@ -6,8 +6,6 @@ import java.util.Scanner;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-
-
 public class FileGestion {
     public static void createFile() {
         try {
