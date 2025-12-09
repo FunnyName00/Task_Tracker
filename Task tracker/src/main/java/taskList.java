@@ -166,7 +166,7 @@ public class taskList {
             case "update": {
                 String task = new String();
                 for (int i = 2; i < newCommand.length; i++){
-                    task += newCommand[i];
+                    task += " "+newCommand[i];
                 }
                 Integer index = Integer.parseInt(newCommand[1]);
                 update(index, task);
