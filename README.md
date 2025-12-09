@@ -10,5 +10,6 @@ With it you can create a useful list of all your diverse tasks and keep track of
 - list : list all available tasks
 - mark-in-progress [index] : mark task at [index] as 'in progress'
 - mark-done [index] : mark task at [index] as 'done'
+- mark-todo [index] : mark task at [index] as 'todo'
 - help : print all available commands
 - quit : quit the program
