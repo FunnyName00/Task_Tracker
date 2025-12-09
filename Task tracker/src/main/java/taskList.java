@@ -201,6 +201,15 @@ public class taskList {
                 break;
             }
 
+            case "mark-todo":{
+                try {
+                    changeStatus(Integer.parseInt(newCommand[1]), 0);
+                } catch (Exception e){
+                    System.out.println("You have to enter a valid index");
+                }
+                break;
+            }
+
             case "help":{
                 System.out.println(
                         "- add [task] : add a task to the list \n" +
@@ -209,6 +218,7 @@ public class taskList {
                         "- list : list all available tasks \n" +
                         "- mark-in-progress [index] : mark task at [index] as 'in progress' \n" +
                         "- mark-done [index] : mark task at [index] as 'done' \n" +
+                        "- mark-todo [index] : mark task at [index] as 'todo' \n" +
                         "- help : print this list \n" +
                         "- quit : quit the program");
                 break;
