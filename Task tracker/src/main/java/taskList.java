@@ -2,7 +2,6 @@ import java.util.ArrayList;
 import java.time.LocalDate;
 import org.json.JSONArray;
 import org.json.JSONObject;
-
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -60,6 +59,7 @@ public class taskList {
     }
 
     public void changeStatus(Integer index, Integer status){
+
         if (status < 0 || status > 2) {
             System.out.println("Enter valid status");
             return;
@@ -166,7 +166,7 @@ public class taskList {
             case "update": {
                 String task = new String();
                 for (int i = 2; i < newCommand.length; i++){
-                    task += newCommand[i];
+                    task += " "+newCommand[i];
                 }
                 Integer index = Integer.parseInt(newCommand[1]);
                 update(index, task);
@@ -184,12 +184,29 @@ public class taskList {
             }
 
             case "mark-in-progress":{
-                changeStatus(Integer.parseInt(newCommand[1]), 1);
+                try {
+                    changeStatus(Integer.parseInt(newCommand[1]), 1);
+                } catch (Exception e){
+                    System.out.println("You have to enter a valid index");
+                }
                 break;
             }
 
             case "mark-done":{
-                changeStatus(Integer.parseInt(newCommand[1]), 2);
+                try {
+                    changeStatus(Integer.parseInt(newCommand[1]), 2);
+                } catch (Exception e){
+                    System.out.println("You have to enter a valid index");
+                }
+                break;
+            }
+
+            case "mark-todo":{
+                try {
+                    changeStatus(Integer.parseInt(newCommand[1]), 0);
+                } catch (Exception e){
+                    System.out.println("You have to enter a valid index");
+                }
                 break;
             }
 
@@ -200,7 +217,9 @@ public class taskList {
                         "- delete [index] : delete task at index [index] \n" +
                         "- list : list all available tasks \n" +
                         "- mark-in-progress [index] : mark task at [index] as 'in progress' \n" +
-                        "- mark-done [index] : mark task at [index] as 'done'" +
+                        "- mark-done [index] : mark task at [index] as 'done' \n" +
+                        "- mark-todo [index] : mark task at [index] as 'todo' \n" +
+                        "- help : print this list \n" +
                         "- quit : quit the program");
                 break;
             }
